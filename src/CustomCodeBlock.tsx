@@ -1,20 +1,23 @@
 import { renderCodeBlock } from './CustomHighlighter';
 import type { CodeBlockProps } from './types';
 
-function extractLanguage(className?: string): string {
-  if (!className) return '';
+// Parse className like "language-js:filename.js:lineNumbers"
+// Growi uses colon-separated format: language:filename
+// We extend it: language:lineNumbers or language:filename:lineNumbers
+function parseClassName(className?: string): {
+  lang: string;
+  showLineNumbers: boolean;
+} {
+  if (!className) return { lang: '', showLineNumbers: false };
+
   const match = className.match(/language-(\S+)/);
-  return match ? match[1] : '';
-}
+  if (!match) return { lang: '', showLineNumbers: false };
 
-function parseMetaString(props: Record<string, any>): { showLineNumbers: boolean } {
-  const showLineNumbers =
-    props.showLineNumbers === true ||
-    props.showlinenumbers === true ||
-    (typeof props.node?.data?.meta === 'string' &&
-      props.node.data.meta.includes('showLineNumbers'));
+  const parts = match[1].split(':');
+  const lang = parts[0];
+  const showLineNumbers = parts.some((p) => p === 'lineNumbers');
 
-  return { showLineNumbers };
+  return { lang, showLineNumbers };
 }
 
 // This is a React component used by Growi's react-markdown.
@@ -25,16 +28,13 @@ export const CustomCodeBlock = ({
   children,
   className,
   inline,
-  node,
-  ...rest
 }: CodeBlockProps) => {
   // Inline code — return plain JSX (no hooks needed)
   if (inline) {
     return <code className={className}>{children}</code>;
   }
 
-  const lang = extractLanguage(className);
-  const { showLineNumbers } = parseMetaString({ ...rest, node });
+  const { lang, showLineNumbers } = parseClassName(className);
   const codeString = String(children);
 
   // Use ref callback to mount pure DOM content
