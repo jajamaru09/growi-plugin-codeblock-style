@@ -16,24 +16,26 @@ export function renderCodeBlock(
   const wrapper = document.createElement('div');
   wrapper.className = `cbs-codeblock-wrapper ${themeClass}`;
 
-  // Toolbar
-  const toolbar = document.createElement('div');
-  toolbar.className = `cbs-toolbar ${toolbarClass}`;
+  // Toolbar — only shown when language is specified
+  if (lang) {
+    const toolbar = document.createElement('div');
+    toolbar.className = `cbs-toolbar ${toolbarClass}`;
 
-  const langLabel = document.createElement('span');
-  langLabel.className = 'cbs-lang-label';
-  langLabel.textContent = lang ? getLanguageDisplayName(lang) : '';
-  toolbar.appendChild(langLabel);
+    const langLabel = document.createElement('span');
+    langLabel.className = 'cbs-lang-label';
+    langLabel.textContent = getLanguageDisplayName(lang);
+    toolbar.appendChild(langLabel);
 
-  const copyBtn = document.createElement('button');
-  copyBtn.className = 'cbs-copy-btn';
-  copyBtn.textContent = 'Copy';
-  copyBtn.type = 'button';
-  copyBtn.title = 'Copy to clipboard';
-  copyBtn.addEventListener('click', handleCopyClick as EventListener);
-  toolbar.appendChild(copyBtn);
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'cbs-copy-btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.type = 'button';
+    copyBtn.title = 'Copy to clipboard';
+    copyBtn.addEventListener('click', handleCopyClick as EventListener);
+    toolbar.appendChild(copyBtn);
 
-  wrapper.appendChild(toolbar);
+    wrapper.appendChild(toolbar);
+  }
 
   // Code block
   const pre = document.createElement('pre');
