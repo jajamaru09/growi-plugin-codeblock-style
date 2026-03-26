@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/**)",
+      "Bash(find /c /d /e /f -maxdepth 3 -name growi-research -type d)",
+      "Bash(git -C /tmp/growi-research rev-parse --show-toplevel)",
+      "WebSearch",
+      "Bash(gh api:*)",
+      "Bash(gh search:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(grep -E \"^\\(markup|xml|xml-doc|visual-basic|cshtml|ignore|gitignore|vba|html\\)\\\\.js$\")",
+      "Bash(npm run:*)",
+      "Bash(cd:*)",
+      "Bash(python -c \":*)"
+    ]
+  }
+}

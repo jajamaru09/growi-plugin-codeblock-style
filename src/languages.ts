@@ -69,7 +69,7 @@ export function registerLanguages(): void {
   PrismAsyncLight.registerLanguage('ts', typescript);
   PrismAsyncLight.registerLanguage('html', markup);
   PrismAsyncLight.registerLanguage('markup', markup);
-  PrismAsyncLight.registerLanguage('xml', xmlDoc);
+  PrismAsyncLight.registerLanguage('xml', markup);
   PrismAsyncLight.registerLanguage('css', css);
   PrismAsyncLight.registerLanguage('scss', scss);
   PrismAsyncLight.registerLanguage('json', json);

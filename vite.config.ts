@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
@@ -6,7 +7,7 @@ export default defineConfig({
   build: {
     manifest: true,
     rollupOptions: {
-      input: ['/client-entry.tsx'],
+      input: [resolve(__dirname, 'client-entry.tsx')],
     },
   },
 });

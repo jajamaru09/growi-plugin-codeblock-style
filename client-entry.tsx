@@ -30,6 +30,7 @@ const activate = (): void => {
     const options = originalCustomViewOptions
       ? originalCustomViewOptions(...args)
       : optionsGenerators.generateViewOptions(...args);
+    if (!options.components) options.components = {};
     options.components.code = CustomCodeBlock;
     return options;
   };
@@ -38,6 +39,7 @@ const activate = (): void => {
     const options = originalCustomPreviewOptions
       ? originalCustomPreviewOptions(...args)
       : optionsGenerators.generatePreviewOptions(...args);
+    if (!options.components) options.components = {};
     options.components.code = CustomCodeBlock;
     return options;
   };
