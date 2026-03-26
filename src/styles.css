@@ -1,0 +1,76 @@
+.cbs-codeblock-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.cbs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.cbs-toolbar-dark {
+  background: hsl(220, 13%, 16%);
+  color: hsl(220, 14%, 60%);
+}
+
+.cbs-toolbar-light {
+  background: hsl(230, 1%, 93%);
+  color: hsl(230, 8%, 40%);
+}
+
+.cbs-lang-label {
+  font-family: sans-serif;
+  font-weight: 500;
+  user-select: none;
+}
+
+.cbs-copy-btn {
+  background: transparent;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  font-family: sans-serif;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cbs-toolbar-dark .cbs-copy-btn {
+  color: hsl(220, 14%, 60%);
+}
+
+.cbs-toolbar-dark .cbs-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: hsl(220, 14%, 80%);
+}
+
+.cbs-toolbar-light .cbs-copy-btn {
+  color: hsl(230, 8%, 40%);
+}
+
+.cbs-toolbar-light .cbs-copy-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: hsl(230, 8%, 25%);
+}
+
+.cbs-codeblock-wrapper pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.cbs-codeblock-wrapper {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cbs-codeblock-wrapper .linenumber {
+  min-width: 2.5em !important;
+  padding-right: 1em !important;
+  text-align: right;
+  user-select: none;
+  opacity: 0.5;
+}
