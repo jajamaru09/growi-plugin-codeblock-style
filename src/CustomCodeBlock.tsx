@@ -35,6 +35,16 @@ export const CustomCodeBlock = ({
   }
 
   const { lang, showLineNumbers } = parseClassName(className);
+
+  // No language specified — fall back to plain pre/code (Growi default style)
+  if (!lang) {
+    return (
+      <pre>
+        <code>{children}</code>
+      </pre>
+    );
+  }
+
   const codeString = String(children);
 
   // Use ref callback to mount pure DOM content
