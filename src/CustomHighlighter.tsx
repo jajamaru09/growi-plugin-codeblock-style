@@ -7,6 +7,7 @@ export function renderCodeBlock(
   code: string,
   lang: string,
   showLineNumbers: boolean,
+  showToolbar: boolean,
 ): HTMLElement {
   const trimmedCode = code.replace(/\n$/, '');
   const highlightedHtml = highlightCode(trimmedCode, lang);
@@ -16,24 +17,26 @@ export function renderCodeBlock(
   const wrapper = document.createElement('div');
   wrapper.className = `cbs-codeblock-wrapper ${themeClass}`;
 
-  // Toolbar
-  const toolbar = document.createElement('div');
-  toolbar.className = `cbs-toolbar ${toolbarClass}`;
+  // Toolbar — only shown with :toolbar option
+  if (showToolbar) {
+    const toolbar = document.createElement('div');
+    toolbar.className = `cbs-toolbar ${toolbarClass}`;
 
-  const langLabel = document.createElement('span');
-  langLabel.className = 'cbs-lang-label';
-  langLabel.textContent = lang ? getLanguageDisplayName(lang) : '';
-  toolbar.appendChild(langLabel);
+    const langLabel = document.createElement('span');
+    langLabel.className = 'cbs-lang-label';
+    langLabel.textContent = lang ? getLanguageDisplayName(lang) : '';
+    toolbar.appendChild(langLabel);
 
-  const copyBtn = document.createElement('button');
-  copyBtn.className = 'cbs-copy-btn';
-  copyBtn.textContent = 'Copy';
-  copyBtn.type = 'button';
-  copyBtn.title = 'Copy to clipboard';
-  copyBtn.addEventListener('click', handleCopyClick as EventListener);
-  toolbar.appendChild(copyBtn);
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'cbs-copy-btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.type = 'button';
+    copyBtn.title = 'Copy to clipboard';
+    copyBtn.addEventListener('click', handleCopyClick as EventListener);
+    toolbar.appendChild(copyBtn);
 
-  wrapper.appendChild(toolbar);
+    wrapper.appendChild(toolbar);
+  }
 
   // Code block — always use language-* class to prevent Growi's
   // code:not([class^=language-]) border styles from applying

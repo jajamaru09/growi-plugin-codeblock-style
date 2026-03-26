@@ -7,6 +7,7 @@ import type { CodeBlockProps } from './types';
 function parseClassName(className?: string): {
   lang: string;
   showLineNumbers: boolean;
+  showToolbar: boolean;
 } {
   if (!className) return { lang: '', showLineNumbers: false };
 
@@ -16,8 +17,9 @@ function parseClassName(className?: string): {
   const parts = match[1].split(':');
   const lang = parts[0];
   const showLineNumbers = parts.some((p) => p === 'lineNumbers');
+  const showToolbar = parts.some((p) => p === 'toolbar');
 
-  return { lang, showLineNumbers };
+  return { lang, showLineNumbers, showToolbar };
 }
 
 // This is a React component used by Growi's react-markdown.
@@ -34,13 +36,13 @@ export const CustomCodeBlock = ({
     return <code className={className}>{children}</code>;
   }
 
-  const { lang, showLineNumbers } = parseClassName(className);
+  const { lang, showLineNumbers, showToolbar } = parseClassName(className);
   const codeString = String(children);
 
   // Use ref callback to mount pure DOM content
   const refCallback = (el: HTMLDivElement | null) => {
     if (el && !el.hasChildNodes()) {
-      const rendered = renderCodeBlock(codeString, lang, showLineNumbers);
+      const rendered = renderCodeBlock(codeString, lang, showLineNumbers, showToolbar);
       el.appendChild(rendered);
     }
   };
