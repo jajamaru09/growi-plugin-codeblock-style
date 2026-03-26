@@ -17,7 +17,8 @@
       "Bash(grep -E \"^\\(markup|xml|xml-doc|visual-basic|cshtml|ignore|gitignore|vba|html\\)\\\\.js$\")",
       "Bash(npm run:*)",
       "Bash(cd:*)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(jq -r .[].name)"
     ]
   }
 }

@@ -8,6 +8,10 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: [resolve(__dirname, 'client-entry.tsx')],
+      output: {
+        manualChunks: undefined,
+        inlineDynamicImports: true,
+      },
     },
   },
 });
