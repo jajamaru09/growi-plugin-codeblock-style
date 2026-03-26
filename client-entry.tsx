@@ -1,4 +1,4 @@
-import { registerLanguages } from './src/languages';
+import './src/languages';
 import { CustomCodeBlock } from './src/CustomCodeBlock';
 import './src/styles.css';
 
@@ -17,12 +17,8 @@ const activate = (): void => {
     return;
   }
 
-  // Register all Prism languages
-  registerLanguages();
-
   const { optionsGenerators } = growiFacade.markdownRenderer;
 
-  // Preserve any previously installed custom options generator (plugin chaining)
   const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
   const originalCustomPreviewOptions = optionsGenerators.customGeneratePreviewOptions;
 
@@ -45,9 +41,7 @@ const activate = (): void => {
   };
 };
 
-const deactivate = (): void => {
-  // No cleanup needed — reload to revert
-};
+const deactivate = (): void => {};
 
 if ((window as any).pluginActivators == null) {
   (window as any).pluginActivators = {};

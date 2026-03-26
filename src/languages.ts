@@ -1,131 +1,94 @@
-import { PrismAsyncLight } from 'react-syntax-highlighter';
+import Prism from 'prismjs';
 
-// Web
-import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
-import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
-import tsx from 'react-syntax-highlighter/dist/esm/languages/prism/tsx';
-import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
-import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup';
-import xmlDoc from 'react-syntax-highlighter/dist/esm/languages/prism/xml-doc';
-import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
-import scss from 'react-syntax-highlighter/dist/esm/languages/prism/scss';
-import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
-import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml';
-import toml from 'react-syntax-highlighter/dist/esm/languages/prism/toml';
-import graphql from 'react-syntax-highlighter/dist/esm/languages/prism/graphql';
-import regex from 'react-syntax-highlighter/dist/esm/languages/prism/regex';
+// Prism core includes: markup, css, clike, javascript by default
+// Import additional languages (order matters for dependencies)
+
+import 'prismjs/components/prism-markup-templating';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-scss';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-yaml';
+import 'prismjs/components/prism-toml';
+import 'prismjs/components/prism-graphql';
+import 'prismjs/components/prism-regex';
 
 // Systems
-import c from 'react-syntax-highlighter/dist/esm/languages/prism/c';
-import cpp from 'react-syntax-highlighter/dist/esm/languages/prism/cpp';
-import csharp from 'react-syntax-highlighter/dist/esm/languages/prism/csharp';
-import rust from 'react-syntax-highlighter/dist/esm/languages/prism/rust';
-import go from 'react-syntax-highlighter/dist/esm/languages/prism/go';
-import java from 'react-syntax-highlighter/dist/esm/languages/prism/java';
-import swift from 'react-syntax-highlighter/dist/esm/languages/prism/swift';
-import kotlin from 'react-syntax-highlighter/dist/esm/languages/prism/kotlin';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-swift';
+import 'prismjs/components/prism-kotlin';
 
 // Scripting
-import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
-import ruby from 'react-syntax-highlighter/dist/esm/languages/prism/ruby';
-import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
-import powershell from 'react-syntax-highlighter/dist/esm/languages/prism/powershell';
-import perl from 'react-syntax-highlighter/dist/esm/languages/prism/perl';
-import php from 'react-syntax-highlighter/dist/esm/languages/prism/php';
-import batch from 'react-syntax-highlighter/dist/esm/languages/prism/batch';
-import autohotkey from 'react-syntax-highlighter/dist/esm/languages/prism/autohotkey';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-powershell';
+import 'prismjs/components/prism-perl';
+import 'prismjs/components/prism-php';
+import 'prismjs/components/prism-batch';
+import 'prismjs/components/prism-autohotkey';
 
-// .NET/VB
-import vbnet from 'react-syntax-highlighter/dist/esm/languages/prism/vbnet';
-import visualBasic from 'react-syntax-highlighter/dist/esm/languages/prism/visual-basic';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore – no type declaration shipped for cshtml
-import cshtml from 'react-syntax-highlighter/dist/esm/languages/prism/cshtml';
+// .NET / VB
+import 'prismjs/components/prism-visual-basic';
+import 'prismjs/components/prism-cshtml';
 
 // Other
-import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore – no type declaration shipped for mongodb
-import mongodb from 'react-syntax-highlighter/dist/esm/languages/prism/mongodb';
-import markdown from 'react-syntax-highlighter/dist/esm/languages/prism/markdown';
-import diff from 'react-syntax-highlighter/dist/esm/languages/prism/diff';
-import docker from 'react-syntax-highlighter/dist/esm/languages/prism/docker';
-import git from 'react-syntax-highlighter/dist/esm/languages/prism/git';
-import ignore from 'react-syntax-highlighter/dist/esm/languages/prism/ignore';
-import apacheconf from 'react-syntax-highlighter/dist/esm/languages/prism/apacheconf';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore – no type declaration shipped for apex
-import apex from 'react-syntax-highlighter/dist/esm/languages/prism/apex';
-import arduino from 'react-syntax-highlighter/dist/esm/languages/prism/arduino';
-import smalltalk from 'react-syntax-highlighter/dist/esm/languages/prism/smalltalk';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-mongodb';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-diff';
+import 'prismjs/components/prism-docker';
+import 'prismjs/components/prism-git';
+import 'prismjs/components/prism-ignore';
+import 'prismjs/components/prism-apacheconf';
+import 'prismjs/components/prism-apex';
+import 'prismjs/components/prism-arduino';
+import 'prismjs/components/prism-smalltalk';
 
-export function registerLanguages(): void {
-  // Web
-  PrismAsyncLight.registerLanguage('javascript', javascript);
-  PrismAsyncLight.registerLanguage('js', javascript);
-  PrismAsyncLight.registerLanguage('jsx', jsx);
-  PrismAsyncLight.registerLanguage('tsx', tsx);
-  PrismAsyncLight.registerLanguage('typescript', typescript);
-  PrismAsyncLight.registerLanguage('ts', typescript);
-  PrismAsyncLight.registerLanguage('html', markup);
-  PrismAsyncLight.registerLanguage('markup', markup);
-  PrismAsyncLight.registerLanguage('xml', markup);
-  PrismAsyncLight.registerLanguage('css', css);
-  PrismAsyncLight.registerLanguage('scss', scss);
-  PrismAsyncLight.registerLanguage('json', json);
-  PrismAsyncLight.registerLanguage('yaml', yaml);
-  PrismAsyncLight.registerLanguage('yml', yaml);
-  PrismAsyncLight.registerLanguage('toml', toml);
-  PrismAsyncLight.registerLanguage('graphql', graphql);
-  PrismAsyncLight.registerLanguage('regex', regex);
+// Language alias map for resolving common aliases
+const LANGUAGE_ALIASES: Record<string, string> = {
+  js: 'javascript',
+  ts: 'typescript',
+  py: 'python',
+  rb: 'ruby',
+  sh: 'bash',
+  shell: 'bash',
+  ps1: 'powershell',
+  bat: 'batch',
+  ahk: 'autohotkey',
+  cs: 'csharp',
+  yml: 'yaml',
+  md: 'markdown',
+  dockerfile: 'docker',
+  gitignore: 'ignore',
+  razor: 'cshtml',
+  vba: 'visual-basic',
+  vbnet: 'visual-basic',
+  html: 'markup',
+  xml: 'markup',
+};
 
-  // Systems
-  PrismAsyncLight.registerLanguage('c', c);
-  PrismAsyncLight.registerLanguage('cpp', cpp);
-  PrismAsyncLight.registerLanguage('csharp', csharp);
-  PrismAsyncLight.registerLanguage('cs', csharp);
-  PrismAsyncLight.registerLanguage('rust', rust);
-  PrismAsyncLight.registerLanguage('go', go);
-  PrismAsyncLight.registerLanguage('java', java);
-  PrismAsyncLight.registerLanguage('swift', swift);
-  PrismAsyncLight.registerLanguage('kotlin', kotlin);
+export function resolveLanguage(lang: string): string {
+  const resolved = LANGUAGE_ALIASES[lang] || lang;
+  return resolved;
+}
 
-  // Scripting
-  PrismAsyncLight.registerLanguage('python', python);
-  PrismAsyncLight.registerLanguage('py', python);
-  PrismAsyncLight.registerLanguage('ruby', ruby);
-  PrismAsyncLight.registerLanguage('rb', ruby);
-  PrismAsyncLight.registerLanguage('bash', bash);
-  PrismAsyncLight.registerLanguage('shell', bash);
-  PrismAsyncLight.registerLanguage('sh', bash);
-  PrismAsyncLight.registerLanguage('powershell', powershell);
-  PrismAsyncLight.registerLanguage('ps1', powershell);
-  PrismAsyncLight.registerLanguage('perl', perl);
-  PrismAsyncLight.registerLanguage('php', php);
-  PrismAsyncLight.registerLanguage('batch', batch);
-  PrismAsyncLight.registerLanguage('bat', batch);
-  PrismAsyncLight.registerLanguage('autohotkey', autohotkey);
-  PrismAsyncLight.registerLanguage('ahk', autohotkey);
-
-  // .NET/VB
-  PrismAsyncLight.registerLanguage('vbnet', vbnet);
-  PrismAsyncLight.registerLanguage('vba', visualBasic);
-  PrismAsyncLight.registerLanguage('cshtml', cshtml);
-  PrismAsyncLight.registerLanguage('razor', cshtml);
-
-  // Other
-  PrismAsyncLight.registerLanguage('sql', sql);
-  PrismAsyncLight.registerLanguage('mongodb', mongodb);
-  PrismAsyncLight.registerLanguage('markdown', markdown);
-  PrismAsyncLight.registerLanguage('md', markdown);
-  PrismAsyncLight.registerLanguage('diff', diff);
-  PrismAsyncLight.registerLanguage('docker', docker);
-  PrismAsyncLight.registerLanguage('dockerfile', docker);
-  PrismAsyncLight.registerLanguage('git', git);
-  PrismAsyncLight.registerLanguage('ignore', ignore);
-  PrismAsyncLight.registerLanguage('gitignore', ignore);
-  PrismAsyncLight.registerLanguage('apacheconf', apacheconf);
-  PrismAsyncLight.registerLanguage('apex', apex);
-  PrismAsyncLight.registerLanguage('arduino', arduino);
-  PrismAsyncLight.registerLanguage('smalltalk', smalltalk);
+export function highlightCode(code: string, lang: string): string {
+  const resolved = resolveLanguage(lang);
+  const grammar = Prism.languages[resolved];
+  if (grammar) {
+    return Prism.highlight(code, grammar, resolved);
+  }
+  // Fallback: return escaped HTML
+  return code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }

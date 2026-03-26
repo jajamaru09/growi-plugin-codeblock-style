@@ -6,6 +6,7 @@ const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
   typescript: 'TypeScript',
   tsx: 'TSX',
   html: 'HTML',
+  markup: 'HTML',
   xml: 'XML',
   css: 'CSS',
   scss: 'SCSS',
@@ -41,6 +42,7 @@ const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
   ahk: 'AutoHotkey',
   vbnet: 'VB.NET',
   vba: 'VBA',
+  'visual-basic': 'VB',
   cshtml: 'Razor C#',
   razor: 'Razor C#',
   sql: 'SQL',
@@ -59,11 +61,6 @@ const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
   smalltalk: 'Smalltalk',
 };
 
-interface LanguageLabelProps {
-  lang: string;
+export function getLanguageDisplayName(lang: string): string {
+  return LANGUAGE_DISPLAY_NAMES[lang] ?? lang;
 }
-
-export const LanguageLabel = ({ lang }: LanguageLabelProps): JSX.Element => {
-  const displayName = LANGUAGE_DISPLAY_NAMES[lang] ?? lang;
-  return <span className="cbs-lang-label">{displayName}</span>;
-};

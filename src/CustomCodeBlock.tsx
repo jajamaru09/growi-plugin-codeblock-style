@@ -1,4 +1,4 @@
-import { CustomHighlighter } from './CustomHighlighter';
+import { renderCodeBlock } from './CustomHighlighter';
 import type { CodeBlockProps } from './types';
 
 function extractLanguage(className?: string): string {
@@ -8,9 +8,6 @@ function extractLanguage(className?: string): string {
 }
 
 function parseMetaString(props: Record<string, any>): { showLineNumbers: boolean } {
-  // react-markdown passes unknown code fence meta tokens as props with value true
-  // e.g., ```js showLineNumbers → props.showLineNumbers === true
-  // Also check the node's meta/data for the raw meta string
   const showLineNumbers =
     props.showLineNumbers === true ||
     props.showlinenumbers === true ||
@@ -20,29 +17,33 @@ function parseMetaString(props: Record<string, any>): { showLineNumbers: boolean
   return { showLineNumbers };
 }
 
+// This is a React component used by Growi's react-markdown.
+// IMPORTANT: No React hooks allowed — the plugin bundles its own React
+// which is a different instance from Growi's React, causing hook errors.
+// Instead, we render pure DOM and mount it via a ref callback.
 export const CustomCodeBlock = ({
   children,
   className,
   inline,
   node,
   ...rest
-}: CodeBlockProps): JSX.Element => {
-  // Inline code
+}: CodeBlockProps) => {
+  // Inline code — return plain JSX (no hooks needed)
   if (inline) {
-    return (
-      <code className={className} {...rest}>
-        {children}
-      </code>
-    );
+    return <code className={className}>{children}</code>;
   }
 
   const lang = extractLanguage(className);
   const { showLineNumbers } = parseMetaString({ ...rest, node });
   const codeString = String(children);
 
-  return (
-    <CustomHighlighter lang={lang} showLineNumbers={showLineNumbers}>
-      {codeString}
-    </CustomHighlighter>
-  );
+  // Use ref callback to mount pure DOM content
+  const refCallback = (el: HTMLDivElement | null) => {
+    if (el && !el.hasChildNodes()) {
+      const rendered = renderCodeBlock(codeString, lang, showLineNumbers);
+      el.appendChild(rendered);
+    }
+  };
+
+  return <div ref={refCallback} />;
 };

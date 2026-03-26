@@ -1,11 +1,7 @@
-import type { CSSProperties, ReactNode } from 'react';
-
 export interface CodeBlockProps {
-  children: ReactNode;
+  children: any;
   className?: string;
   inline?: boolean;
   node?: any;
   [key: string]: any;
 }
-
-export type PrismTheme = { [key: string]: CSSProperties };

@@ -1,18 +1,20 @@
-import { useState, useCallback } from 'react';
+// No React hooks — uses DOM manipulation for "Copied!" feedback
+// to avoid dual-React-instance issues in Growi plugins
 
-interface CopyButtonProps {
-  text: string;
-}
+export function handleCopyClick(e: MouseEvent): void {
+  const button = e.currentTarget as HTMLButtonElement;
+  const wrapper = button.closest('.cbs-codeblock-wrapper');
+  if (!wrapper) return;
 
-export const CopyButton = ({ text }: CopyButtonProps): JSX.Element => {
-  const [copied, setCopied] = useState(false);
+  const codeEl = wrapper.querySelector('code');
+  if (!codeEl) return;
 
-  const handleClick = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
+  const text = codeEl.textContent ?? '';
+
+  navigator.clipboard.writeText(text).then(
+    () => showCopiedFeedback(button),
+    () => {
+      // Fallback for older browsers
       const textarea = document.createElement('textarea');
       textarea.value = text;
       textarea.style.position = 'fixed';
@@ -21,19 +23,15 @@ export const CopyButton = ({ text }: CopyButtonProps): JSX.Element => {
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }, [text]);
-
-  return (
-    <button
-      className="cbs-copy-btn"
-      onClick={handleClick}
-      title="Copy to clipboard"
-      type="button"
-    >
-      {copied ? 'Copied!' : 'Copy'}
-    </button>
+      showCopiedFeedback(button);
+    },
   );
-};
+}
+
+function showCopiedFeedback(button: HTMLButtonElement): void {
+  const original = button.textContent;
+  button.textContent = 'Copied!';
+  setTimeout(() => {
+    button.textContent = original;
+  }, 2000);
+}

@@ -18,7 +18,9 @@
       "Bash(npm run:*)",
       "Bash(cd:*)",
       "Bash(python -c \":*)",
-      "Bash(jq -r .[].name)"
+      "Bash(jq -r .[].name)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(i[''''path'''']\\) for i in d.get\\(''''items'''',[]\\)]\")",
+      "Bash(npm uninstall:*)"
     ]
   }
 }
