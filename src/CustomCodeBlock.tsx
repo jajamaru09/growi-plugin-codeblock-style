@@ -9,10 +9,10 @@ function parseClassName(className?: string): {
   showLineNumbers: boolean;
   showToolbar: boolean;
 } {
-  if (!className) return { lang: '', showLineNumbers: false };
+  if (!className) return { lang: '', showLineNumbers: false, showToolbar: false };
 
   const match = className.match(/language-(\S+)/);
-  if (!match) return { lang: '', showLineNumbers: false };
+  if (!match) return { lang: '', showLineNumbers: false, showToolbar: false };
 
   const parts = match[1].split(':');
   const lang = parts[0];
