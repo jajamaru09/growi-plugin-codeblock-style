@@ -16,33 +16,34 @@ export function renderCodeBlock(
   const wrapper = document.createElement('div');
   wrapper.className = `cbs-codeblock-wrapper ${themeClass}`;
 
-  // Toolbar — only shown when language is specified
-  if (lang) {
-    const toolbar = document.createElement('div');
-    toolbar.className = `cbs-toolbar ${toolbarClass}`;
+  // Toolbar
+  const toolbar = document.createElement('div');
+  toolbar.className = `cbs-toolbar ${toolbarClass}`;
 
-    const langLabel = document.createElement('span');
-    langLabel.className = 'cbs-lang-label';
-    langLabel.textContent = getLanguageDisplayName(lang);
-    toolbar.appendChild(langLabel);
+  const langLabel = document.createElement('span');
+  langLabel.className = 'cbs-lang-label';
+  langLabel.textContent = lang ? getLanguageDisplayName(lang) : '';
+  toolbar.appendChild(langLabel);
 
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'cbs-copy-btn';
-    copyBtn.textContent = 'Copy';
-    copyBtn.type = 'button';
-    copyBtn.title = 'Copy to clipboard';
-    copyBtn.addEventListener('click', handleCopyClick as EventListener);
-    toolbar.appendChild(copyBtn);
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'cbs-copy-btn';
+  copyBtn.textContent = 'Copy';
+  copyBtn.type = 'button';
+  copyBtn.title = 'Copy to clipboard';
+  copyBtn.addEventListener('click', handleCopyClick as EventListener);
+  toolbar.appendChild(copyBtn);
 
-    wrapper.appendChild(toolbar);
-  }
+  wrapper.appendChild(toolbar);
 
-  // Code block
+  // Code block — always use language-* class to prevent Growi's
+  // code:not([class^=language-]) border styles from applying
+  const langClass = lang ? `language-${lang}` : 'language-plaintext';
+
   const pre = document.createElement('pre');
-  pre.className = lang ? `language-${lang}` : '';
+  pre.className = langClass;
 
   const codeEl = document.createElement('code');
-  codeEl.className = lang ? `language-${lang}` : '';
+  codeEl.className = langClass;
 
   if (showLineNumbers) {
     const lines = trimmedCode.split('\n');
