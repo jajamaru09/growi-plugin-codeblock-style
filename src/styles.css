@@ -17,6 +17,7 @@
 }
 
 .cbs-codeblock-wrapper pre code {
+  font-size: 0.95em;
   font-family: inherit;
   background: none !important;
   padding: 0 !important;
