@@ -1,6 +1,5 @@
 import './src/prismSetup';
 import './src/styles.css';
-import { remarkCodeDirective } from './src/remarkCodeDirective';
 import { CustomCodeBlock } from './src/CustomCodeBlock';
 
 declare global {
@@ -28,15 +27,11 @@ const activate = (): void => {
       ? originalCustomViewOptions(...args)
       : optionsGenerators.generateViewOptions(...args);
 
-    // Add remark plugin for :::code directive
-    if (!options.remarkPlugins) options.remarkPlugins = [];
-    options.remarkPlugins.push(remarkCodeDirective);
-
-    // Replace code component — CustomCodeBlock handles both:
-    // - :::code blocks (CBS_MARKER in className → custom rendering)
-    // - standard ``` blocks (no marker → pass through to default)
+    // Register :::prism directive component.
+    // Growi already has remark-directive loaded, so :::prism is parsed
+    // as a containerDirective automatically. We just map it to our component.
     if (!options.components) options.components = {};
-    options.components.code = CustomCodeBlock;
+    options.components.prism = CustomCodeBlock;
 
     return options;
   };
@@ -46,11 +41,8 @@ const activate = (): void => {
       ? originalCustomPreviewOptions(...args)
       : optionsGenerators.generatePreviewOptions(...args);
 
-    if (!options.remarkPlugins) options.remarkPlugins = [];
-    options.remarkPlugins.push(remarkCodeDirective);
-
     if (!options.components) options.components = {};
-    options.components.code = CustomCodeBlock;
+    options.components.prism = CustomCodeBlock;
 
     return options;
   };
