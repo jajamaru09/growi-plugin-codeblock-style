@@ -15,11 +15,16 @@ export const CustomCodeBlock = (props: any) => {
   const code = props['data-code'] || '';
 
   const refCallback = (el: HTMLDivElement | null) => {
-    if (el && !el.hasChildNodes()) {
-      const rendered = renderCodeBlock(code, lang, showLineNumbers, showToolbar);
-      el.appendChild(rendered);
-    }
+    if (!el) return;
+    // Always clear and re-render so live preview updates when code changes
+    el.innerHTML = '';
+    const rendered = renderCodeBlock(code, lang, showLineNumbers, showToolbar);
+    el.appendChild(rendered);
   };
 
-  return <div ref={refCallback} />;
+  // key forces React to remount when content/options change,
+  // ensuring refCallback fires with the new values
+  const key = `${lang}:${showToolbar}:${showLineNumbers}:${code}`;
+
+  return <div key={key} ref={refCallback} />;
 };
