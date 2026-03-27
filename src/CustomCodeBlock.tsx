@@ -35,6 +35,7 @@ export function createCodeComponent(
 ) {
   return (props: any) => {
     const className: string = props.className || '';
+    console.log('[cbs] code component called, className:', className, 'inline:', props.inline);
     const match = className.match(/language-__prism__(.*)/);
 
     if (!match) {
