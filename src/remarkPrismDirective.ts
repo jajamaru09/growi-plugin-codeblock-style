@@ -1,18 +1,90 @@
 import { visit } from 'unist-util-visit';
 
-// --- Shared parser ---
+// --- Shared types ---
 
-// Parse options string like "js:toolbar:lineNumbers"
-function parseOptions(str: string): {
+export interface PrismOptions {
   lang: string;
   showToolbar: boolean;
   showLineNumbers: boolean;
-} {
+  highlight: string;      // e.g., "1,3-5,7"
+  diffHighlight: boolean;
+  commandLine: boolean;
+  prompt: string;         // e.g., "$" or ">"
+  user: string;           // e.g., "root"
+  host: string;           // e.g., "localhost"
+  output: string;         // e.g., "2-4" (lines that are output, no prompt)
+}
+
+const defaultOptions: PrismOptions = {
+  lang: '',
+  showToolbar: false,
+  showLineNumbers: false,
+  highlight: '',
+  diffHighlight: false,
+  commandLine: false,
+  prompt: '',
+  user: '',
+  host: '',
+  output: '',
+};
+
+// --- Shared parser ---
+
+// Parse colon-separated options: "js:toolbar:lineNumbers:highlight=3-5:commandLine:prompt=$"
+function parseColonOptions(str: string): PrismOptions {
+  const opts = { ...defaultOptions };
   const parts = str.split(':');
+
+  opts.lang = parts[0] || '';
+
+  for (let i = 1; i < parts.length; i++) {
+    const part = parts[i];
+    const [key, ...rest] = part.split('=');
+    const value = rest.join('=');
+
+    switch (key) {
+      case 'toolbar': opts.showToolbar = true; break;
+      case 'lineNumbers': opts.showLineNumbers = true; break;
+      case 'highlight': opts.highlight = value || ''; break;
+      case 'diffHighlight': opts.diffHighlight = true; break;
+      case 'commandLine': opts.commandLine = true; break;
+      case 'prompt': opts.prompt = value || '$'; break;
+      case 'user': opts.user = value || ''; break;
+      case 'host': opts.host = value || ''; break;
+      case 'output': opts.output = value || ''; break;
+    }
+  }
+
+  return opts;
+}
+
+// Parse structured attributes: :::prism{lang=js toolbar highlight="3-5"}
+function applyAttributes(opts: PrismOptions, attrs: Record<string, string>): void {
+  if (attrs.lang) opts.lang = attrs.lang;
+  if ('toolbar' in attrs) opts.showToolbar = true;
+  if ('lineNumbers' in attrs) opts.showLineNumbers = true;
+  if (attrs.highlight) opts.highlight = attrs.highlight;
+  if ('diffHighlight' in attrs) opts.diffHighlight = true;
+  if ('commandLine' in attrs) opts.commandLine = true;
+  if (attrs.prompt) opts.prompt = attrs.prompt;
+  if (attrs.user) opts.user = attrs.user;
+  if (attrs.host) opts.host = attrs.host;
+  if (attrs.output) opts.output = attrs.output;
+}
+
+// Serialize PrismOptions to data-* attributes for HAST
+function toDataAttributes(opts: PrismOptions): Record<string, string> {
   return {
-    lang: parts[0] || '',
-    showToolbar: parts.includes('toolbar'),
-    showLineNumbers: parts.includes('lineNumbers'),
+    'data-lang': opts.lang,
+    'data-toolbar': opts.showToolbar ? 'true' : 'false',
+    'data-line-numbers': opts.showLineNumbers ? 'true' : 'false',
+    'data-highlight': opts.highlight,
+    'data-diff-highlight': opts.diffHighlight ? 'true' : 'false',
+    'data-command-line': opts.commandLine ? 'true' : 'false',
+    'data-prompt': opts.prompt,
+    'data-user': opts.user,
+    'data-host': opts.host,
+    'data-output': opts.output,
   };
 }
 
@@ -35,27 +107,21 @@ function extractMdastText(children: any[]): string {
 function handleContainerDirective(node: any): void {
   if (node.name !== 'prism') return;
 
-  let lang = '';
-  let showToolbar = false;
-  let showLineNumbers = false;
+  const opts = { ...defaultOptions };
 
   const fullText = extractMdastText(node.children || []).trim();
   const lines = fullText.split('\n');
 
   let codeStartIndex = 0;
   const firstLine = lines[0]?.trim() || '';
-  if (/^[a-zA-Z0-9_+#.-]+(:[a-zA-Z]+)*$/.test(firstLine)) {
-    const parsed = parseOptions(firstLine);
-    lang = parsed.lang;
-    showToolbar = parsed.showToolbar;
-    showLineNumbers = parsed.showLineNumbers;
+  if (/^[a-zA-Z0-9_+#.-]+(:[a-zA-Z0-9=.$>-]+)*$/.test(firstLine)) {
+    const parsed = parseColonOptions(firstLine);
+    Object.assign(opts, parsed);
     codeStartIndex = 1;
   }
 
   if (node.attributes) {
-    if (node.attributes.lang) lang = node.attributes.lang;
-    if ('toolbar' in node.attributes) showToolbar = true;
-    if ('lineNumbers' in node.attributes) showLineNumbers = true;
+    applyAttributes(opts, node.attributes);
   }
 
   const code = lines.slice(codeStartIndex).join('\n');
@@ -63,9 +129,7 @@ function handleContainerDirective(node: any): void {
   const data = node.data || (node.data = {});
   data.hName = 'prism';
   data.hProperties = {
-    'data-lang': lang,
-    'data-toolbar': showToolbar ? 'true' : 'false',
-    'data-line-numbers': showLineNumbers ? 'true' : 'false',
+    ...toDataAttributes(opts),
     'data-code': code,
   };
   data.hChildren = [];
@@ -74,7 +138,6 @@ function handleContainerDirective(node: any): void {
 
 // --- Fenced code block handler (```prism-js:toolbar) ---
 
-// Prefix for fenced code blocks: ```prism or ```prism-js:toolbar
 const PRISM_CODE_PREFIX = 'prism';
 
 function handleCodeNode(node: any): void {
@@ -83,35 +146,25 @@ function handleCodeNode(node: any): void {
     return;
   }
 
-  // Parse: "prism" → no options, "prism-js:toolbar" → lang=js, toolbar
   const optionsStr = nodeLang === PRISM_CODE_PREFIX
     ? ''
     : nodeLang.slice(PRISM_CODE_PREFIX.length + 1);
 
-  const { lang, showToolbar, showLineNumbers } = parseOptions(optionsStr);
-  const code = node.value || '';
+  const opts = parseColonOptions(optionsStr);
 
-  // Set the real language for basic className (language-js)
-  node.lang = lang || null;
+  // Set the real language for className
+  node.lang = opts.lang || null;
 
-  // Store prism metadata in data-* attributes.
-  // className may be stripped by rehype-sanitize, but data-* attributes
-  // survive because they're whitelisted on all elements via "*": ["data*"].
   const data = node.data || (node.data = {});
   data.hProperties = {
     ...(data.hProperties || {}),
     'data-prism': 'true',
-    'data-prism-lang': lang,
-    'data-prism-toolbar': showToolbar ? 'true' : 'false',
-    'data-prism-line-numbers': showLineNumbers ? 'true' : 'false',
+    ...toDataAttributes(opts),
   };
 }
 
 // --- Combined remark plugin ---
 
-// Handles both syntaxes:
-//   :::prism{lang=js toolbar}    (container directive — content parsed as markdown)
-//   ```prism-js:toolbar           (fenced code — content is literal text)
 export function remarkPrismDirective() {
   return (tree: any) => {
     visit(tree, (node: any) => {

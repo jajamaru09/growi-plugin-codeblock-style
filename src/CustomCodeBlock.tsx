@@ -1,23 +1,45 @@
-import { renderCodeBlock } from './CustomHighlighter';
+import { renderCodeBlock, RenderOptions } from './CustomHighlighter';
+
+// --- Helpers ---
+
+function propsToRenderOptions(p: Record<string, string>): { lang: string; code: string; options: RenderOptions } {
+  return {
+    lang: p['data-lang'] || '',
+    code: p['data-code'] || '',
+    options: {
+      showToolbar: p['data-toolbar'] === 'true',
+      showLineNumbers: p['data-line-numbers'] === 'true',
+      highlight: p['data-highlight'] || '',
+      diffHighlight: p['data-diff-highlight'] === 'true',
+      commandLine: p['data-command-line'] === 'true',
+      prompt: p['data-prompt'] || '',
+      user: p['data-user'] || '',
+      host: p['data-host'] || '',
+      output: p['data-output'] || '',
+    },
+  };
+}
+
+// IMPORTANT: No React hooks — the plugin bundles its own React
+// which is a different instance from Growi's React, causing hook errors.
+function renderToDiv(code: string, lang: string, options: RenderOptions) {
+  const refCallback = (el: HTMLDivElement | null) => {
+    if (!el) return;
+    el.innerHTML = '';
+    const rendered = renderCodeBlock(code, lang, options);
+    el.appendChild(rendered);
+  };
+
+  const key = `${lang}:${JSON.stringify(options)}:${code}`;
+  return <div key={key} ref={refCallback} />;
+}
 
 // --- Directive component (:::prism) ---
 
-interface PrismBlockProps {
-  'data-lang'?: string;
-  'data-toolbar'?: string;
-  'data-line-numbers'?: string;
-  'data-code'?: string;
-  [key: string]: unknown;
-}
-
 // Component for :::prism directive — registered as components['prism']
-export const PrismDirectiveBlock = (props: PrismBlockProps) => {
-  const lang = props['data-lang'] || '';
-  const showToolbar = props['data-toolbar'] === 'true';
-  const showLineNumbers = props['data-line-numbers'] === 'true';
-  const code = props['data-code'] || '';
-
-  return renderToDiv(code, lang, showLineNumbers, showToolbar);
+export const PrismDirectiveBlock = (props: any) => {
+  const { lang, code, options } = propsToRenderOptions(props);
+  return renderToDiv(code, lang, options);
 };
 
 // --- Code component (```prism-js:toolbar) ---
@@ -30,19 +52,16 @@ export function createCodeComponent(
   growiReact: any,
 ) {
   return (props: any) => {
-    // Check for data-prism attribute set by remarkPrismDirective
     if (props['data-prism'] === 'true') {
-      const lang = props['data-prism-lang'] || '';
-      const showToolbar = props['data-prism-toolbar'] === 'true';
-      const showLineNumbers = props['data-prism-line-numbers'] === 'true';
+      const { lang, options } = propsToRenderOptions(props);
       const code = typeof props.children === 'string'
         ? props.children
         : String(props.children || '');
 
-      return renderToDiv(code, lang, showLineNumbers, showToolbar);
+      return renderToDiv(code, lang, options);
     }
 
-    // Not a prism block — delegate to Growi's original code component
+    // Delegate to Growi's original code component
     if (OriginalCode && growiReact) {
       return growiReact.createElement(OriginalCode, props);
     }
@@ -50,26 +69,4 @@ export function createCodeComponent(
       ? growiReact.createElement('code', props)
       : null;
   };
-}
-
-// --- Shared DOM rendering ---
-
-// IMPORTANT: No React hooks — the plugin bundles its own React
-// which is a different instance from Growi's React, causing hook errors.
-// We render pure DOM and mount it via a ref callback.
-function renderToDiv(
-  code: string,
-  lang: string,
-  showLineNumbers: boolean,
-  showToolbar: boolean,
-) {
-  const refCallback = (el: HTMLDivElement | null) => {
-    if (!el) return;
-    el.innerHTML = '';
-    const rendered = renderCodeBlock(code, lang, showLineNumbers, showToolbar);
-    el.appendChild(rendered);
-  };
-
-  const key = `${lang}:${showToolbar}:${showLineNumbers}:${code}`;
-  return <div key={key} ref={refCallback} />;
 }

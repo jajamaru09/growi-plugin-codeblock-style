@@ -105,6 +105,51 @@
 }
 
 /* ========================================
+   Line Highlight
+   ======================================== */
+
+.cbs-theme-dark .cbs-line-highlight {
+  background: rgba(99, 163, 255, 0.12);
+}
+
+.cbs-theme-light .cbs-line-highlight {
+  background: rgba(99, 163, 255, 0.15);
+}
+
+/* ========================================
+   Diff Highlight
+   ======================================== */
+
+.cbs-theme-dark .cbs-diff-inserted {
+  background: rgba(80, 200, 120, 0.15);
+}
+
+.cbs-theme-dark .cbs-diff-deleted {
+  background: rgba(255, 85, 85, 0.15);
+}
+
+.cbs-theme-light .cbs-diff-inserted {
+  background: rgba(40, 167, 69, 0.12);
+}
+
+.cbs-theme-light .cbs-diff-deleted {
+  background: rgba(220, 53, 69, 0.12);
+}
+
+/* ========================================
+   Command Line Prompt
+   ======================================== */
+
+.cbs-prompt {
+  user-select: none;
+  padding-right: 0.75em !important;
+  opacity: 0.6;
+  white-space: nowrap;
+  vertical-align: top;
+  font-family: inherit;
+}
+
+/* ========================================
    One Dark Theme (for dark mode)
    ======================================== */
 
