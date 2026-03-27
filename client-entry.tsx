@@ -32,9 +32,11 @@ const activate = (): void => {
     if (!options.remarkPlugins) options.remarkPlugins = [];
     options.remarkPlugins.push(remarkCodeDirective);
 
-    // Map <cbs-code> to CustomCodeBlock component
+    // Replace code component — CustomCodeBlock handles both:
+    // - :::code blocks (CBS_MARKER in className → custom rendering)
+    // - standard ``` blocks (no marker → pass through to default)
     if (!options.components) options.components = {};
-    options.components['cbs-code'] = CustomCodeBlock;
+    options.components.code = CustomCodeBlock;
 
     return options;
   };
@@ -48,7 +50,7 @@ const activate = (): void => {
     options.remarkPlugins.push(remarkCodeDirective);
 
     if (!options.components) options.components = {};
-    options.components['cbs-code'] = CustomCodeBlock;
+    options.components.code = CustomCodeBlock;
 
     return options;
   };

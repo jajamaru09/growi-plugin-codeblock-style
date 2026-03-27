@@ -1,18 +1,8 @@
 import { visit } from 'unist-util-visit';
-import type { Root, Paragraph, Text } from 'mdast';
+import type { Root, Paragraph, Text, Code } from 'mdast';
 
-// Parse "js:toolbar:lineNumbers" into structured options
-function parseDirectiveLabel(label: string): {
-  lang: string;
-  showLineNumbers: boolean;
-  showToolbar: boolean;
-} {
-  const parts = label.split(':');
-  const lang = parts[0] || '';
-  const showLineNumbers = parts.some((p) => p === 'lineNumbers');
-  const showToolbar = parts.some((p) => p === 'toolbar');
-  return { lang, showLineNumbers, showToolbar };
-}
+// Marker prefix to distinguish :::code blocks from standard ``` blocks
+export const CBS_MARKER = '__cbs__';
 
 // Extract full text content from a paragraph node (joining all text/break children)
 function getParagraphText(node: Paragraph): string {
@@ -25,17 +15,15 @@ function getParagraphText(node: Paragraph): string {
     .join('');
 }
 
-// Remark plugin: transforms paragraphs containing :::code ... ::: into custom HAST nodes.
-// Works without remark-directive by directly scanning paragraph text content.
+// Remark plugin: transforms paragraphs containing :::code ... ::: into
+// standard mdast `code` nodes with a marker in the `lang` field.
 //
-// Supports:
-//   :::code js
-//   const x = 42;
-//   :::
+// The marker allows the code component to distinguish :::code blocks
+// from standard ``` blocks at render time.
 //
-//   :::code js:toolbar:lineNumbers
-//   const x = 42;
-//   :::
+// :::code js:toolbar       → code node with lang = "__cbs__js:toolbar"
+// :::code js:lineNumbers   → code node with lang = "__cbs__js:lineNumbers"
+// :::code                  → code node with lang = "__cbs__"
 export function remarkCodeDirective() {
   return (tree: Root) => {
     visit(tree, 'paragraph', (node: Paragraph, index, parent) => {
@@ -49,27 +37,17 @@ export function remarkCodeDirective() {
 
       const labelStr = match[1] || '';
       const code = match[2] || '';
-      const { lang, showLineNumbers, showToolbar } = parseDirectiveLabel(labelStr);
 
-      // Replace with a custom node type — must NOT be 'code' because
-      // remark-rehype has a built-in handler for 'code' that ignores data.hName.
-      // An unknown type falls through to the default handler which respects data.hName.
-      const replacement: any = {
-        type: 'cbsCodeBlock',
-        data: {
-          hName: 'cbs-code',
-          hProperties: {
-            lang,
-            showToolbar: showToolbar ? 'true' : 'false',
-            showLineNumbers: showLineNumbers ? 'true' : 'false',
-            code,
-          },
-          hChildren: [],
-        },
+      // Create a standard code node with a marker prefix in lang.
+      // remark-rehype handles code nodes natively → <pre><code class="language-__cbs__js:toolbar">
+      const replacement: Code = {
+        type: 'code',
+        lang: CBS_MARKER + labelStr,
+        value: code,
       };
 
       parent.children.splice(index, 1, replacement);
-      return index; // revisit this index since we replaced the node
+      return index;
     });
   };
 }
