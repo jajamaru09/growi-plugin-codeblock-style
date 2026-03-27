@@ -29,10 +29,16 @@ const activate = (): void => {
       ? originalCustomViewOptions(...args)
       : optionsGenerators.generateViewOptions(...args);
 
+    // Debug: inspect available option keys
+    console.log('[cbs] options keys:', Object.keys(options));
+    console.log('[cbs] remarkPlugins exists:', 'remarkPlugins' in options, options.remarkPlugins);
+
     // Add remark plugins for :::code directive
     if (!options.remarkPlugins) options.remarkPlugins = [];
     options.remarkPlugins.push(remarkDirective);
     options.remarkPlugins.push(remarkCodeDirective);
+
+    console.log('[cbs] remarkPlugins after push:', options.remarkPlugins);
 
     // Map <cbs-code> to CustomCodeBlock component
     if (!options.components) options.components = {};
