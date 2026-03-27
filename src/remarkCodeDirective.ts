@@ -1,15 +1,7 @@
 import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
+import type { Root, Paragraph, Text } from 'mdast';
 
-// Type for containerDirective nodes created by remark-directive
-interface ContainerDirective {
-  type: 'containerDirective';
-  name: string;
-  attributes?: Record<string, string>;
-  children: Array<{ type: string; children?: Array<{ type: string; value?: string }> }>;
-  data?: Record<string, unknown>;
-}
-
+// Parse "js:toolbar:lineNumbers" into structured options
 function parseDirectiveLabel(label: string): {
   lang: string;
   showLineNumbers: boolean;
@@ -22,80 +14,61 @@ function parseDirectiveLabel(label: string): {
   return { lang, showLineNumbers, showToolbar };
 }
 
-function extractTextContent(node: ContainerDirective): { label: string; code: string } {
-  // remark-directive places the directive label (e.g., "js:toolbar")
-  // as text inside the first paragraph child, or in node.attributes.
-  // The actual code content is in subsequent children.
-  //
-  // For :::code js:toolbar\nconst x = 42;\n:::
-  // The AST typically looks like:
-  //   containerDirective { name: 'code',
-  //     children: [
-  //       paragraph { children: [text { value: 'const x = 42;' }] }
-  //     ]
-  //   }
-  // And the label "js:toolbar" is available via node.attributes or
-  // the first "data" part after the directive name.
-  //
-  // remark-directive puts the text after :::code on the same line
-  // into the `attributes` or the directive label. We need to check
-  // the actual AST structure.
-  //
-  // According to remark-directive docs:
-  //   :::code{lang=js}   → attributes: { lang: 'js' }
-  //   :::code js:toolbar  → The "js:toolbar" becomes a label/text
-  //
-  // For `:::code js:toolbar`, remark-directive treats "js:toolbar"
-  // as the directive's "label" (first text line) which ends up as
-  // text content of a paragraph in children.
-  //
-  // Let's handle both: check if first child is a paragraph containing
-  // just the label, and remaining children contain the code.
-
-  let label = '';
-  let codeLines: string[] = [];
-
-  for (const child of node.children) {
-    if (child.type === 'paragraph' && child.children) {
-      const text = child.children
-        .filter((c) => c.type === 'text')
-        .map((c) => c.value ?? '')
-        .join('');
-
-      if (!label && /^[a-zA-Z0-9_-]+(:[a-zA-Z]+)*$/.test(text.trim())) {
-        // This looks like a label (e.g., "js:toolbar:lineNumbers")
-        label = text.trim();
-      } else {
-        codeLines.push(text);
-      }
-    } else if (child.type === 'code' || child.type === 'text') {
-      codeLines.push((child as any).value ?? '');
-    }
-  }
-
-  return { label, code: codeLines.join('\n') };
+// Extract full text content from a paragraph node (joining all text/break children)
+function getParagraphText(node: Paragraph): string {
+  return node.children
+    .map((child) => {
+      if (child.type === 'text') return (child as Text).value;
+      if (child.type === 'break') return '\n';
+      return '';
+    })
+    .join('');
 }
 
+// Remark plugin: transforms paragraphs containing :::code ... ::: into custom HAST nodes.
+// Works without remark-directive by directly scanning paragraph text content.
+//
+// Supports:
+//   :::code js
+//   const x = 42;
+//   :::
+//
+//   :::code js:toolbar:lineNumbers
+//   const x = 42;
+//   :::
 export function remarkCodeDirective() {
   return (tree: Root) => {
-    visit(tree, 'containerDirective', (rawNode) => {
-      const node = rawNode as unknown as ContainerDirective;
-      if (node.name !== 'code') return;
+    visit(tree, 'paragraph', (node: Paragraph, index, parent) => {
+      if (index == null || parent == null) return;
 
-      const { label, code } = extractTextContent(node);
-      const { lang, showLineNumbers, showToolbar } = parseDirectiveLabel(label);
+      const text = getParagraphText(node);
 
-      // Transform to HAST-ready node
-      const data = node.data || (node.data = {});
-      data.hName = 'cbs-code';
-      data.hProperties = {
-        lang,
-        showToolbar: showToolbar ? 'true' : 'false',
-        showLineNumbers: showLineNumbers ? 'true' : 'false',
-        code,
+      // Match: starts with :::code, ends with :::
+      const match = text.match(/^:::code(?:\s+(\S+))?\n([\s\S]*?)\n:::$/);
+      if (!match) return;
+
+      const labelStr = match[1] || '';
+      const code = match[2] || '';
+      const { lang, showLineNumbers, showToolbar } = parseDirectiveLabel(labelStr);
+
+      // Replace the paragraph node with a custom HAST-ready node
+      const replacement: any = {
+        type: 'code', // use 'code' node type so it passes through mdast-to-hast
+        value: code,
+        data: {
+          hName: 'cbs-code',
+          hProperties: {
+            lang,
+            showToolbar: showToolbar ? 'true' : 'false',
+            showLineNumbers: showLineNumbers ? 'true' : 'false',
+            code,
+          },
+          hChildren: [],
+        },
       };
-      // Clear children — the code is now in hProperties
-      node.children = [];
+
+      parent.children.splice(index, 1, replacement);
+      return index; // revisit this index since we replaced the node
     });
   };
 }
