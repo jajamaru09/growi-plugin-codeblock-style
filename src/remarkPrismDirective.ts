@@ -84,9 +84,11 @@ export const PRISM_CODE_PREFIX = 'prism';
 
 function handleCodeNode(node: any): void {
   const nodeLang: string = node.lang || '';
+  console.log('[cbs] remark code node found, lang:', nodeLang);
   if (nodeLang !== PRISM_CODE_PREFIX && !nodeLang.startsWith(PRISM_CODE_PREFIX + '-')) {
     return;
   }
+  console.log('[cbs] remark matched prism code block, processing...');
 
   // Parse: "prism" → no options, "prism-js:toolbar" → lang=js, toolbar
   const optionsStr = nodeLang === PRISM_CODE_PREFIX
