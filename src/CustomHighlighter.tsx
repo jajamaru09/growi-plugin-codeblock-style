@@ -10,8 +10,9 @@ export function renderCodeBlock(
 ): HTMLElement {
   const trimmedCode = code.replace(/\n$/, '');
   const highlightedHtml = highlightCode(trimmedCode, lang);
-  const themeClass = isDarkMode ? 'cbs-theme-dark' : 'cbs-theme-light';
-  const toolbarClass = isDarkMode ? 'cbs-toolbar-dark' : 'cbs-toolbar-light';
+  const dark = isDarkMode();
+  const themeClass = dark ? 'cbs-theme-dark' : 'cbs-theme-light';
+  const toolbarClass = dark ? 'cbs-toolbar-dark' : 'cbs-toolbar-light';
 
   const wrapper = document.createElement('div');
   wrapper.className = `cbs-codeblock-wrapper ${themeClass}`;
