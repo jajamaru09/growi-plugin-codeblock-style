@@ -1,7 +1,7 @@
 import './src/prismSetup';
 import './src/styles.css';
 import { remarkPrismDirective } from './src/remarkPrismDirective';
-import { CustomCodeBlock } from './src/CustomCodeBlock';
+import { PrismDirectiveBlock, createCodeComponent } from './src/CustomCodeBlock';
 
 declare global {
   var growiFacade: any;
@@ -18,6 +18,7 @@ const activate = (): void => {
     return;
   }
 
+  const growiReact = growiFacade.react;
   const { optionsGenerators } = growiFacade.markdownRenderer;
 
   const originalCustomViewOptions = optionsGenerators.customGenerateViewOptions;
@@ -28,14 +29,18 @@ const activate = (): void => {
       ? originalCustomViewOptions(...args)
       : optionsGenerators.generateViewOptions(...args);
 
-    // Add handler for :::prism containerDirective nodes
-    // (Growi's built-in remark-directive does the parsing)
+    // Add remark plugin for both :::prism and ```prism-* handling
     if (!options.remarkPlugins) options.remarkPlugins = [];
     options.remarkPlugins.push(remarkPrismDirective);
 
-    // Map <prism> element to our component
     if (!options.components) options.components = {};
-    options.components.prism = CustomCodeBlock;
+
+    // :::prism directive → PrismDirectiveBlock
+    options.components.prism = PrismDirectiveBlock;
+
+    // ```prism-* fenced code → custom, else → Growi's original
+    const OriginalCode = options.components.code;
+    options.components.code = createCodeComponent(OriginalCode, growiReact);
 
     return options;
   };
@@ -49,7 +54,11 @@ const activate = (): void => {
     options.remarkPlugins.push(remarkPrismDirective);
 
     if (!options.components) options.components = {};
-    options.components.prism = CustomCodeBlock;
+
+    options.components.prism = PrismDirectiveBlock;
+
+    const OriginalCode = options.components.code;
+    options.components.code = createCodeComponent(OriginalCode, growiReact);
 
     return options;
   };
