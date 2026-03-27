@@ -2,6 +2,9 @@
 // The languageRegistry in languageRegistry.ts provides metadata (aliases, display names).
 // This file handles the actual Prism component registration.
 
+// Prism core must be loaded before any component imports
+import 'prismjs';
+
 // Web / Frontend
 import 'prismjs/components/prism-markup-templating';
 import 'prismjs/components/prism-jsx';
