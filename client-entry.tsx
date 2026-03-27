@@ -1,6 +1,8 @@
-import './src/languages';
-import { CustomCodeBlock } from './src/CustomCodeBlock';
+import './src/prismSetup';
 import './src/styles.css';
+import remarkDirective from 'remark-directive';
+import { remarkCodeDirective } from './src/remarkCodeDirective';
+import { CustomCodeBlock } from './src/CustomCodeBlock';
 
 declare global {
   var growiFacade: any;
@@ -26,8 +28,16 @@ const activate = (): void => {
     const options = originalCustomViewOptions
       ? originalCustomViewOptions(...args)
       : optionsGenerators.generateViewOptions(...args);
+
+    // Add remark plugins for :::code directive
+    if (!options.remarkPlugins) options.remarkPlugins = [];
+    options.remarkPlugins.push(remarkDirective);
+    options.remarkPlugins.push(remarkCodeDirective);
+
+    // Map <cbs-code> to CustomCodeBlock component
     if (!options.components) options.components = {};
-    options.components.code = CustomCodeBlock;
+    options.components['cbs-code'] = CustomCodeBlock;
+
     return options;
   };
 
@@ -35,8 +45,14 @@ const activate = (): void => {
     const options = originalCustomPreviewOptions
       ? originalCustomPreviewOptions(...args)
       : optionsGenerators.generatePreviewOptions(...args);
+
+    if (!options.remarkPlugins) options.remarkPlugins = [];
+    options.remarkPlugins.push(remarkDirective);
+    options.remarkPlugins.push(remarkCodeDirective);
+
     if (!options.components) options.components = {};
-    options.components.code = CustomCodeBlock;
+    options.components['cbs-code'] = CustomCodeBlock;
+
     return options;
   };
 };
