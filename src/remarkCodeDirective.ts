@@ -51,10 +51,11 @@ export function remarkCodeDirective() {
       const code = match[2] || '';
       const { lang, showLineNumbers, showToolbar } = parseDirectiveLabel(labelStr);
 
-      // Replace the paragraph node with a custom HAST-ready node
+      // Replace with a custom node type — must NOT be 'code' because
+      // remark-rehype has a built-in handler for 'code' that ignores data.hName.
+      // An unknown type falls through to the default handler which respects data.hName.
       const replacement: any = {
-        type: 'code', // use 'code' node type so it passes through mdast-to-hast
-        value: code,
+        type: 'cbsCodeBlock',
         data: {
           hName: 'cbs-code',
           hProperties: {
