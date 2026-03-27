@@ -1,5 +1,4 @@
-import { highlightCode } from './languageRegistry';
-import { getLanguageDisplayName } from './languageRegistry';
+import { highlightCode, getLanguageDisplayName } from './languageRegistry';
 import { handleCopyClick } from './CopyButton';
 import { isDarkMode } from './theme';
 

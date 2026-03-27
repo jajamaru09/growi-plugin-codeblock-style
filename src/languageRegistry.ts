@@ -4,11 +4,15 @@ export interface LanguageDef {
   id: string;
   aliases?: string[];
   displayName?: string;
+  aliasDisplayNames?: Record<string, string>;
   module: string;
   dependencies?: string[];
 }
 
 // Adding a language: add one entry to this array.
+// NOTE: `module` and `dependencies` are documentation only — actual Prism
+// registration happens via static imports in prismSetup.ts. When adding a
+// language here, also add the corresponding import in prismSetup.ts.
 export const languageRegistry: LanguageDef[] = [
   // --- Web / Frontend ---
   { id: 'markup-templating', module: 'prismjs/components/prism-markup-templating' },
@@ -23,7 +27,7 @@ export const languageRegistry: LanguageDef[] = [
   { id: 'toml', displayName: 'TOML', module: 'prismjs/components/prism-toml' },
   { id: 'graphql', displayName: 'GraphQL', module: 'prismjs/components/prism-graphql' },
   { id: 'regex', displayName: 'Regex', module: 'prismjs/components/prism-regex' },
-  { id: 'markup', aliases: ['html', 'xml'], displayName: 'HTML', module: 'prismjs/components/prism-markup' },
+  { id: 'markup', aliases: ['html', 'xml'], displayName: 'HTML', aliasDisplayNames: { xml: 'XML' }, module: 'prismjs/components/prism-markup' },
 
   // --- Systems ---
   { id: 'c', displayName: 'C', module: 'prismjs/components/prism-c' },
@@ -38,7 +42,7 @@ export const languageRegistry: LanguageDef[] = [
   // --- Scripting ---
   { id: 'python', aliases: ['py'], displayName: 'Python', module: 'prismjs/components/prism-python' },
   { id: 'ruby', aliases: ['rb'], displayName: 'Ruby', module: 'prismjs/components/prism-ruby' },
-  { id: 'bash', aliases: ['sh', 'shell'], displayName: 'Bash', module: 'prismjs/components/prism-bash' },
+  { id: 'bash', aliases: ['sh', 'shell'], displayName: 'Bash', aliasDisplayNames: { sh: 'Shell', shell: 'Shell' }, module: 'prismjs/components/prism-bash' },
   { id: 'powershell', aliases: ['ps1'], displayName: 'PowerShell', module: 'prismjs/components/prism-powershell' },
   { id: 'perl', displayName: 'Perl', module: 'prismjs/components/prism-perl' },
   { id: 'php', displayName: 'PHP', module: 'prismjs/components/prism-php', dependencies: ['markup-templating'] },
@@ -46,7 +50,7 @@ export const languageRegistry: LanguageDef[] = [
   { id: 'autohotkey', aliases: ['ahk'], displayName: 'AutoHotkey', module: 'prismjs/components/prism-autohotkey' },
 
   // --- .NET / VB ---
-  { id: 'visual-basic', aliases: ['vbnet', 'vba'], displayName: 'VB', module: 'prismjs/components/prism-visual-basic' },
+  { id: 'visual-basic', aliases: ['vbnet', 'vba'], displayName: 'VB', aliasDisplayNames: { vbnet: 'VB.NET', vba: 'VBA' }, module: 'prismjs/components/prism-visual-basic' },
   { id: 'cshtml', aliases: ['razor'], displayName: 'Razor C#', module: 'prismjs/components/prism-cshtml', dependencies: ['markup-templating'] },
 
   // --- Other ---
@@ -54,9 +58,9 @@ export const languageRegistry: LanguageDef[] = [
   { id: 'mongodb', displayName: 'MongoDB', module: 'prismjs/components/prism-mongodb' },
   { id: 'markdown', aliases: ['md'], displayName: 'Markdown', module: 'prismjs/components/prism-markdown' },
   { id: 'diff', displayName: 'Diff', module: 'prismjs/components/prism-diff' },
-  { id: 'docker', aliases: ['dockerfile'], displayName: 'Docker', module: 'prismjs/components/prism-docker' },
+  { id: 'docker', aliases: ['dockerfile'], displayName: 'Docker', aliasDisplayNames: { dockerfile: 'Dockerfile' }, module: 'prismjs/components/prism-docker' },
   { id: 'git', displayName: 'Git', module: 'prismjs/components/prism-git' },
-  { id: 'ignore', aliases: ['gitignore'], displayName: '.ignore', module: 'prismjs/components/prism-ignore' },
+  { id: 'ignore', aliases: ['gitignore'], displayName: '.ignore', aliasDisplayNames: { gitignore: '.gitignore' }, module: 'prismjs/components/prism-ignore' },
   { id: 'apacheconf', displayName: 'Apache Conf', module: 'prismjs/components/prism-apacheconf' },
   { id: 'apex', displayName: 'Apex', module: 'prismjs/components/prism-apex' },
   { id: 'arduino', displayName: 'Arduino', module: 'prismjs/components/prism-arduino', dependencies: ['cpp'] },
@@ -75,8 +79,10 @@ for (const def of languageRegistry) {
   if (def.aliases) {
     for (const alias of def.aliases) {
       aliasMap[alias] = def.id;
-      if (def.displayName) {
-        displayNameMap[alias] = def.displayName;
+      // Per-alias display name takes priority, then falls back to parent displayName
+      const aliasName = def.aliasDisplayNames?.[alias] ?? def.displayName;
+      if (aliasName) {
+        displayNameMap[alias] = aliasName;
       }
     }
   }
