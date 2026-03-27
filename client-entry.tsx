@@ -1,5 +1,6 @@
 import './src/prismSetup';
 import './src/styles.css';
+import { remarkPrismDirective } from './src/remarkPrismDirective';
 import { CustomCodeBlock } from './src/CustomCodeBlock';
 
 declare global {
@@ -27,9 +28,12 @@ const activate = (): void => {
       ? originalCustomViewOptions(...args)
       : optionsGenerators.generateViewOptions(...args);
 
-    // Register :::prism directive component.
-    // Growi already has remark-directive loaded, so :::prism is parsed
-    // as a containerDirective automatically. We just map it to our component.
+    // Add handler for :::prism containerDirective nodes
+    // (Growi's built-in remark-directive does the parsing)
+    if (!options.remarkPlugins) options.remarkPlugins = [];
+    options.remarkPlugins.push(remarkPrismDirective);
+
+    // Map <prism> element to our component
     if (!options.components) options.components = {};
     options.components.prism = CustomCodeBlock;
 
@@ -40,6 +44,9 @@ const activate = (): void => {
     const options = originalCustomPreviewOptions
       ? originalCustomPreviewOptions(...args)
       : optionsGenerators.generatePreviewOptions(...args);
+
+    if (!options.remarkPlugins) options.remarkPlugins = [];
+    options.remarkPlugins.push(remarkPrismDirective);
 
     if (!options.components) options.components = {};
     options.components.prism = CustomCodeBlock;
