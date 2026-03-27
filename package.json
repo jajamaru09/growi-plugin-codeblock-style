@@ -16,7 +16,9 @@
   "dependencies": {
     "prismjs": "^1.30.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "remark-directive": "^4.0.0",
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@types/prismjs": "^1.26.6",
