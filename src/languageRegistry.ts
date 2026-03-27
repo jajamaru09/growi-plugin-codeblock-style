@@ -5,14 +5,14 @@ export interface LanguageDef {
   aliases?: string[];
   displayName?: string;
   aliasDisplayNames?: Record<string, string>;
+  // `module` and `dependencies` are documentation only — actual Prism
+  // registration happens via static imports in prismSetup.ts.
+  // When adding a language, also add the corresponding import there.
   module: string;
   dependencies?: string[];
 }
 
-// Adding a language: add one entry to this array.
-// NOTE: `module` and `dependencies` are documentation only — actual Prism
-// registration happens via static imports in prismSetup.ts. When adding a
-// language here, also add the corresponding import in prismSetup.ts.
+// Adding a language: add one entry here AND a static import in prismSetup.ts.
 export const languageRegistry: LanguageDef[] = [
   // --- Web / Frontend ---
   { id: 'markup-templating', module: 'prismjs/components/prism-markup-templating' },

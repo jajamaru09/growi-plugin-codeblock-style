@@ -8,7 +8,15 @@ import { renderCodeBlock } from './CustomHighlighter';
 //
 // IMPORTANT: No React hooks — the plugin bundles its own React
 // which is a different instance from Growi's React, causing hook errors.
-export const CustomCodeBlock = (props: any) => {
+interface PrismBlockProps {
+  'data-lang'?: string;
+  'data-toolbar'?: string;
+  'data-line-numbers'?: string;
+  'data-code'?: string;
+  [key: string]: unknown;
+}
+
+export const CustomCodeBlock = (props: PrismBlockProps) => {
   const lang = props['data-lang'] || '';
   const showToolbar = props['data-toolbar'] === 'true';
   const showLineNumbers = props['data-line-numbers'] === 'true';

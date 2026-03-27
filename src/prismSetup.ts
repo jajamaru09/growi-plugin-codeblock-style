@@ -55,5 +55,4 @@ import 'prismjs/components/prism-apex';
 import 'prismjs/components/prism-arduino';
 import 'prismjs/components/prism-smalltalk';
 
-// Prism plugins — add imports here when adding entries to prismPluginRegistry
-// (none yet)
+// Prism plugins — add side-effect imports here as needed
