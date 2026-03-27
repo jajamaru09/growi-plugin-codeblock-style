@@ -78,7 +78,8 @@ function extractTextContent(node: ContainerDirective): { label: string; code: st
 
 export function remarkCodeDirective() {
   return (tree: Root) => {
-    visit(tree, 'containerDirective', (node: ContainerDirective) => {
+    visit(tree, 'containerDirective', (rawNode) => {
+      const node = rawNode as unknown as ContainerDirective;
       if (node.name !== 'code') return;
 
       const { label, code } = extractTextContent(node);
