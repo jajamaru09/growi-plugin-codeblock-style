@@ -18,7 +18,6 @@ function parseOptions(str: string): {
 
 // --- Container directive handler (:::prism) ---
 
-// Extract text content from mdast children (paragraphs, text nodes, etc.)
 function extractMdastText(children: any[]): string {
   const parts: string[] = [];
   for (const child of children) {
@@ -40,11 +39,9 @@ function handleContainerDirective(node: any): void {
   let showToolbar = false;
   let showLineNumbers = false;
 
-  // Extract text from children
   const fullText = extractMdastText(node.children || []).trim();
   const lines = fullText.split('\n');
 
-  // Check if first line is a label (e.g., "js:toolbar:lineNumbers")
   let codeStartIndex = 0;
   const firstLine = lines[0]?.trim() || '';
   if (/^[a-zA-Z0-9_+#.-]+(:[a-zA-Z]+)*$/.test(firstLine)) {
@@ -55,7 +52,6 @@ function handleContainerDirective(node: any): void {
     codeStartIndex = 1;
   }
 
-  // Structured attributes override (:::prism{lang=js toolbar})
   if (node.attributes) {
     if (node.attributes.lang) lang = node.attributes.lang;
     if ('toolbar' in node.attributes) showToolbar = true;
@@ -64,7 +60,6 @@ function handleContainerDirective(node: any): void {
 
   const code = lines.slice(codeStartIndex).join('\n');
 
-  // Set HAST conversion properties
   const data = node.data || (node.data = {});
   data.hName = 'prism';
   data.hProperties = {
@@ -80,35 +75,36 @@ function handleContainerDirective(node: any): void {
 // --- Fenced code block handler (```prism-js:toolbar) ---
 
 // Prefix for fenced code blocks: ```prism or ```prism-js:toolbar
-export const PRISM_CODE_PREFIX = 'prism';
+const PRISM_CODE_PREFIX = 'prism';
 
 function handleCodeNode(node: any): void {
   const nodeLang: string = node.lang || '';
-  console.log('[cbs] remark code node found, lang:', nodeLang);
   if (nodeLang !== PRISM_CODE_PREFIX && !nodeLang.startsWith(PRISM_CODE_PREFIX + '-')) {
     return;
   }
-  console.log('[cbs] remark matched prism code block, processing...');
 
   // Parse: "prism" → no options, "prism-js:toolbar" → lang=js, toolbar
   const optionsStr = nodeLang === PRISM_CODE_PREFIX
     ? ''
-    : nodeLang.slice(PRISM_CODE_PREFIX.length + 1); // skip "prism-"
+    : nodeLang.slice(PRISM_CODE_PREFIX.length + 1);
 
   const { lang, showToolbar, showLineNumbers } = parseOptions(optionsStr);
   const code = node.value || '';
 
-  // Mark this code node for our component.
-  // We set a special lang prefix so the code component can detect it.
-  node.lang = `__prism__${lang}`;
-  node.meta = [
-    showToolbar ? 'toolbar' : '',
-    showLineNumbers ? 'lineNumbers' : '',
-  ].filter(Boolean).join(':') || null;
+  // Set the real language for basic className (language-js)
+  node.lang = lang || null;
 
-  // Store parsed data for the component
+  // Store prism metadata in data-* attributes.
+  // className may be stripped by rehype-sanitize, but data-* attributes
+  // survive because they're whitelisted on all elements via "*": ["data*"].
   const data = node.data || (node.data = {});
-  data.prismOptions = { lang, showToolbar, showLineNumbers, code };
+  data.hProperties = {
+    ...(data.hProperties || {}),
+    'data-prism': 'true',
+    'data-prism-lang': lang,
+    'data-prism-toolbar': showToolbar ? 'true' : 'false',
+    'data-prism-line-numbers': showLineNumbers ? 'true' : 'false',
+  };
 }
 
 // --- Combined remark plugin ---

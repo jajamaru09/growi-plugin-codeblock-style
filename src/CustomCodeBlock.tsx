@@ -1,8 +1,4 @@
 import { renderCodeBlock } from './CustomHighlighter';
-import { PRISM_CODE_PREFIX } from './remarkPrismDirective';
-
-// Marker prefix set by remarkPrismDirective on fenced code blocks
-const CODE_MARKER = '__prism__';
 
 // --- Directive component (:::prism) ---
 
@@ -27,42 +23,32 @@ export const PrismDirectiveBlock = (props: PrismBlockProps) => {
 // --- Code component (```prism-js:toolbar) ---
 
 // Wraps Growi's original code component.
-// Detects ```prism-* blocks and renders them custom;
+// Detects ```prism-* blocks via data-prism attribute;
 // delegates everything else to Growi's original.
 export function createCodeComponent(
   OriginalCode: any,
   growiReact: any,
 ) {
   return (props: any) => {
-    const className: string = props.className || '';
-    console.log('[cbs] code component called, className:', className, 'inline:', props.inline, 'all props:', Object.keys(props));
-    const match = className.match(/language-__prism__(.*)/);
+    // Check for data-prism attribute set by remarkPrismDirective
+    if (props['data-prism'] === 'true') {
+      const lang = props['data-prism-lang'] || '';
+      const showToolbar = props['data-prism-toolbar'] === 'true';
+      const showLineNumbers = props['data-prism-line-numbers'] === 'true';
+      const code = typeof props.children === 'string'
+        ? props.children
+        : String(props.children || '');
 
-    if (!match) {
-      // Not a prism block — delegate to Growi's original code component
-      if (OriginalCode && growiReact) {
-        return growiReact.createElement(OriginalCode, props);
-      }
-      // Fallback if no original available
-      return growiReact
-        ? growiReact.createElement('code', props)
-        : null;
+      return renderToDiv(code, lang, showLineNumbers, showToolbar);
     }
 
-    // Parse options from className: language-__prism__js → lang=js
-    const lang = match[1] || '';
-    const children = props.children;
-    const code = typeof children === 'string'
-      ? children
-      : Array.isArray(children) ? children.join('') : String(children || '');
-
-    // Read meta options (set by remarkPrismDirective on code node)
-    const node = props.node;
-    const prismOptions = node?.data?.prismOptions;
-    const showToolbar = prismOptions?.showToolbar ?? false;
-    const showLineNumbers = prismOptions?.showLineNumbers ?? false;
-
-    return renderToDiv(code, lang, showLineNumbers, showToolbar);
+    // Not a prism block — delegate to Growi's original code component
+    if (OriginalCode && growiReact) {
+      return growiReact.createElement(OriginalCode, props);
+    }
+    return growiReact
+      ? growiReact.createElement('code', props)
+      : null;
   };
 }
 
