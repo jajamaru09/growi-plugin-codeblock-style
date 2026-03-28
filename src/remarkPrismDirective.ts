@@ -8,11 +8,20 @@ export interface PrismOptions {
   showLineNumbers: boolean;
   highlight: string;      // e.g., "1,3-5,7"
   diffHighlight: boolean;
+  diffLang: string;       // e.g., "js" (target language for language-specific diff)
   commandLine: boolean;
   prompt: string;         // e.g., "$" or ">"
   user: string;           // e.g., "root"
   host: string;           // e.g., "localhost"
   output: string;         // e.g., "2-4" (lines that are output, no prompt)
+  filterOutput: string;   // e.g., "(out)" prefix marks output lines
+  continuationStr: string; // e.g., "\\" line-ending continuation marker
+  continuationPrompt: string; // e.g., ">" prompt for continuation lines
+  filterContinuation: string; // e.g., "(con)" prefix marks continuation lines
+  start: number;          // starting line number (default: 1)
+  copyText: string;       // custom copy button text
+  copySuccess: string;    // custom success message
+  copyTimeout: number;    // timeout in ms
 }
 
 const defaultOptions: PrismOptions = {
@@ -21,11 +30,20 @@ const defaultOptions: PrismOptions = {
   showLineNumbers: false,
   highlight: '',
   diffHighlight: false,
+  diffLang: '',
   commandLine: false,
   prompt: '',
   user: '',
   host: '',
   output: '',
+  filterOutput: '',
+  continuationStr: '',
+  continuationPrompt: '',
+  filterContinuation: '',
+  start: 1,
+  copyText: '',
+  copySuccess: '',
+  copyTimeout: 0,
 };
 
 // --- Shared parser ---
@@ -52,6 +70,14 @@ function parseColonOptions(str: string): PrismOptions {
       case 'user': opts.user = value || ''; break;
       case 'host': opts.host = value || ''; break;
       case 'output': opts.output = value || ''; break;
+      case 'filterOutput': opts.filterOutput = value || ''; break;
+      case 'continuationStr': opts.continuationStr = value || ''; break;
+      case 'continuationPrompt': opts.continuationPrompt = value || '>'; break;
+      case 'filterContinuation': opts.filterContinuation = value || ''; break;
+      case 'start': opts.start = parseInt(value, 10) || 1; break;
+      case 'copyText': opts.copyText = value || ''; break;
+      case 'copySuccess': opts.copySuccess = value || ''; break;
+      case 'copyTimeout': opts.copyTimeout = parseInt(value, 10) || 0; break;
     }
   }
 
@@ -70,6 +96,23 @@ function applyAttributes(opts: PrismOptions, attrs: Record<string, string>): voi
   if (attrs.user) opts.user = attrs.user;
   if (attrs.host) opts.host = attrs.host;
   if (attrs.output) opts.output = attrs.output;
+  if (attrs.filterOutput) opts.filterOutput = attrs.filterOutput;
+  if (attrs.continuationStr) opts.continuationStr = attrs.continuationStr;
+  if (attrs.continuationPrompt) opts.continuationPrompt = attrs.continuationPrompt;
+  if (attrs.filterContinuation) opts.filterContinuation = attrs.filterContinuation;
+  if (attrs.start) opts.start = parseInt(attrs.start, 10) || 1;
+  if (attrs.copyText) opts.copyText = attrs.copyText;
+  if (attrs.copySuccess) opts.copySuccess = attrs.copySuccess;
+  if (attrs.copyTimeout) opts.copyTimeout = parseInt(attrs.copyTimeout, 10) || 0;
+}
+
+// Detect "diff-xxx" language pattern and split into diffLang + diffHighlight
+function resolveDiffLanguage(opts: PrismOptions): void {
+  if (opts.lang.startsWith('diff-') && opts.lang.length > 5) {
+    opts.diffLang = opts.lang.slice(5);
+    opts.lang = 'diff';
+    opts.diffHighlight = true;
+  }
 }
 
 // Serialize PrismOptions to data-* attributes for HAST
@@ -80,11 +123,20 @@ function toDataAttributes(opts: PrismOptions): Record<string, string> {
     'data-line-numbers': opts.showLineNumbers ? 'true' : 'false',
     'data-highlight': opts.highlight,
     'data-diff-highlight': opts.diffHighlight ? 'true' : 'false',
+    'data-diff-lang': opts.diffLang,
     'data-command-line': opts.commandLine ? 'true' : 'false',
     'data-prompt': opts.prompt,
     'data-user': opts.user,
     'data-host': opts.host,
     'data-output': opts.output,
+    'data-filter-output': opts.filterOutput,
+    'data-continuation-str': opts.continuationStr,
+    'data-continuation-prompt': opts.continuationPrompt,
+    'data-filter-continuation': opts.filterContinuation,
+    'data-start': String(opts.start),
+    'data-copy-text': opts.copyText,
+    'data-copy-success': opts.copySuccess,
+    'data-copy-timeout': String(opts.copyTimeout),
   };
 }
 
@@ -123,6 +175,7 @@ function handleContainerDirective(node: any): void {
   if (node.attributes) {
     applyAttributes(opts, node.attributes);
   }
+  resolveDiffLanguage(opts);
 
   const code = lines.slice(codeStartIndex).join('\n');
 
@@ -151,6 +204,7 @@ function handleCodeNode(node: any): void {
     : nodeLang.slice(PRISM_CODE_PREFIX.length + 1);
 
   const opts = parseColonOptions(optionsStr);
+  resolveDiffLanguage(opts);
 
   // Set the real language for className
   node.lang = opts.lang || null;

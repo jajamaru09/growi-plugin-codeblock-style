@@ -30,8 +30,10 @@ export function handleCopyClick(e: MouseEvent): void {
 
 function showCopiedFeedback(button: HTMLButtonElement): void {
   const original = button.textContent;
-  button.textContent = 'Copied!';
+  const successText = button.dataset.copySuccess || 'Copied!';
+  const timeout = parseInt(button.dataset.copyTimeout || '', 10) || 2000;
+  button.textContent = successText;
   setTimeout(() => {
     button.textContent = original;
-  }, 2000);
+  }, timeout);
 }

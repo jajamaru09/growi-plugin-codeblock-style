@@ -26,11 +26,20 @@ export interface RenderOptions {
   showToolbar: boolean;
   highlight: string;
   diffHighlight: boolean;
+  diffLang: string;
   commandLine: boolean;
   prompt: string;
   user: string;
   host: string;
   output: string;
+  filterOutput: string;
+  continuationStr: string;
+  continuationPrompt: string;
+  filterContinuation: string;
+  start: number;
+  copyText: string;
+  copySuccess: string;
+  copyTimeout: number;
 }
 
 export function renderCodeBlock(
@@ -39,12 +48,64 @@ export function renderCodeBlock(
   options: RenderOptions,
 ): HTMLElement {
   const trimmedCode = code.replace(/\n$/, '');
-  const effectiveLang = options.diffHighlight && !lang ? 'diff' : lang;
-  const highlightedHtml = highlightCode(trimmedCode, effectiveLang);
   const dark = isDarkMode();
   const themeClass = dark ? 'cbs-theme-dark' : 'cbs-theme-light';
   const toolbarClass = dark ? 'cbs-toolbar-dark' : 'cbs-toolbar-light';
 
+  // Resolve effective language for highlighting
+  let effectiveLang = lang;
+  if (options.diffHighlight && !lang && !options.diffLang) {
+    effectiveLang = 'diff';
+  }
+  // Display language for toolbar label and CSS class
+  const displayLang = options.diffLang || effectiveLang;
+
+  const lines = trimmedCode.split('\n');
+
+  // --- Preprocess command-line lines (filter prefixes) ---
+  let processedLines = [...lines];
+  const filterOutputSet = new Set<number>();
+  const filterContinuationSet = new Set<number>();
+
+  if (options.commandLine) {
+    if (options.filterOutput) {
+      processedLines = processedLines.map((line, i) => {
+        if (line.startsWith(options.filterOutput)) {
+          filterOutputSet.add(i + 1);
+          return line.slice(options.filterOutput.length);
+        }
+        return line;
+      });
+    }
+    if (options.filterContinuation) {
+      processedLines = processedLines.map((line, i) => {
+        if (line.startsWith(options.filterContinuation)) {
+          filterContinuationSet.add(i + 1);
+          return line.slice(options.filterContinuation.length);
+        }
+        return line;
+      });
+    }
+  }
+
+  // --- Syntax highlighting ---
+  let highlightedLines: string[];
+
+  if (options.diffHighlight && options.diffLang) {
+    // Language-specific diff: strip prefixes, highlight each line with target language
+    const strippedLines = processedLines.map(line => {
+      const ch = line.charAt(0);
+      return (ch === '+' || ch === '-' || ch === ' ') ? line.slice(1) : line;
+    });
+    highlightedLines = strippedLines.map(line => highlightCode(line, options.diffLang));
+  } else {
+    // Normal highlighting (including plain diff)
+    const codeToHighlight = options.commandLine ? processedLines.join('\n') : trimmedCode;
+    const highlightedHtml = highlightCode(codeToHighlight, effectiveLang);
+    highlightedLines = highlightedHtml.split('\n');
+  }
+
+  // --- Build DOM ---
   const wrapper = document.createElement('div');
   wrapper.className = `cbs-codeblock-wrapper ${themeClass}`;
 
@@ -55,21 +116,23 @@ export function renderCodeBlock(
 
     const langLabel = document.createElement('span');
     langLabel.className = 'cbs-lang-label';
-    langLabel.textContent = effectiveLang ? getLanguageDisplayName(effectiveLang) : '';
+    langLabel.textContent = displayLang ? getLanguageDisplayName(displayLang) : '';
     toolbar.appendChild(langLabel);
 
     const copyBtn = document.createElement('button');
     copyBtn.className = 'cbs-copy-btn';
-    copyBtn.textContent = 'Copy';
+    copyBtn.textContent = options.copyText || 'Copy';
     copyBtn.type = 'button';
     copyBtn.title = 'Copy to clipboard';
+    if (options.copySuccess) copyBtn.dataset.copySuccess = options.copySuccess;
+    if (options.copyTimeout) copyBtn.dataset.copyTimeout = String(options.copyTimeout);
     copyBtn.addEventListener('click', handleCopyClick as EventListener);
     toolbar.appendChild(copyBtn);
 
     wrapper.appendChild(toolbar);
   }
 
-  const langClass = effectiveLang ? `language-${effectiveLang}` : 'language-plaintext';
+  const langClass = displayLang ? `language-${displayLang}` : 'language-plaintext';
 
   const pre = document.createElement('pre');
   pre.className = langClass;
@@ -77,8 +140,6 @@ export function renderCodeBlock(
   const codeEl = document.createElement('code');
   codeEl.className = langClass;
 
-  const lines = trimmedCode.split('\n');
-  const highlightedLines = highlightedHtml.split('\n');
   const highlightSet = parseLineRanges(options.highlight);
   const outputSet = parseLineRanges(options.output);
 
@@ -90,13 +151,14 @@ export function renderCodeBlock(
     } else if (options.user || options.host) {
       const u = options.user || 'user';
       const h = options.host || 'localhost';
-      promptStr = `${u}@${h}`;
+      const suffix = u === 'root' ? '#' : '$';
+      promptStr = `${u}@${h} ${suffix}`;
     } else {
       promptStr = '$';
     }
   }
 
-  // Use table for line numbers, line highlight, command-line, or diff-highlight
+  // Use table when features require per-line structure
   const useTable = options.showLineNumbers || highlightSet.size > 0
     || options.commandLine || options.diffHighlight;
 
@@ -104,8 +166,9 @@ export function renderCodeBlock(
     const table = document.createElement('table');
     table.className = 'cbs-line-numbers-table';
 
-    lines.forEach((rawLine, i) => {
-      const lineNum = i + 1;
+    processedLines.forEach((rawLine, i) => {
+      const lineNum = options.start + i;
+      const lineIdx = i + 1; // 1-based index for range lookups
       const tr = document.createElement('tr');
 
       // Line highlight
@@ -113,7 +176,7 @@ export function renderCodeBlock(
         tr.className = 'cbs-line-highlight';
       }
 
-      // Diff highlight
+      // Diff highlight (check original line before prefix stripping)
       if (options.diffHighlight) {
         if (rawLine.startsWith('+')) {
           tr.classList.add('cbs-diff-inserted');
@@ -134,7 +197,19 @@ export function renderCodeBlock(
       if (options.commandLine) {
         const tdPrompt = document.createElement('td');
         tdPrompt.className = 'cbs-prompt';
-        tdPrompt.textContent = outputSet.has(lineNum) ? '' : promptStr;
+
+        const isOutput = outputSet.has(lineIdx) || filterOutputSet.has(lineIdx);
+        const isContinuation = filterContinuationSet.has(lineIdx) ||
+          (options.continuationStr && i > 0 &&
+            processedLines[i - 1].endsWith(options.continuationStr));
+
+        if (isOutput) {
+          tdPrompt.textContent = '';
+        } else if (isContinuation) {
+          tdPrompt.textContent = options.continuationPrompt || '>';
+        } else {
+          tdPrompt.textContent = promptStr;
+        }
         tr.appendChild(tdPrompt);
       }
 
@@ -149,7 +224,7 @@ export function renderCodeBlock(
 
     codeEl.appendChild(table);
   } else {
-    codeEl.innerHTML = highlightedHtml;
+    codeEl.innerHTML = highlightedLines.join('\n');
   }
 
   pre.appendChild(codeEl);
