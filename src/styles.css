@@ -1,0 +1,286 @@
+/* ========================================
+   Code Block Wrapper
+   ======================================== */
+
+.cbs-codeblock-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cbs-codeblock-wrapper pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  padding: 1em !important;
+  overflow-x: auto;
+}
+
+.cbs-codeblock-wrapper pre code {
+  font-size: 1.25em;
+  font-family: inherit;
+  background: none !important;
+  padding: 0 !important;
+}
+
+/* ========================================
+   Toolbar
+   ======================================== */
+
+.cbs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px;
+  /*font-size: 0.75rem;*/
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.cbs-toolbar-dark {
+  background: hsl(220, 13%, 16%);
+  color: hsl(220, 14%, 60%);
+}
+
+.cbs-toolbar-light {
+  background: hsl(230, 1%, 93%);
+  color: hsl(230, 8%, 40%);
+}
+
+.cbs-lang-label {
+  font-family: sans-serif;
+  font-weight: 500;
+  user-select: none;
+}
+
+.cbs-copy-btn {
+  background: transparent;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  font-family: sans-serif;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cbs-toolbar-dark .cbs-copy-btn {
+  color: hsl(220, 14%, 60%);
+}
+.cbs-toolbar-dark .cbs-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: hsl(220, 14%, 80%);
+}
+
+.cbs-toolbar-light .cbs-copy-btn {
+  color: hsl(230, 8%, 40%);
+}
+.cbs-toolbar-light .cbs-copy-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: hsl(230, 8%, 25%);
+}
+
+/* ========================================
+   Line Numbers
+   ======================================== */
+
+.cbs-line-numbers-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.cbs-line-number {
+  user-select: none;
+  text-align: right;
+  padding-right: 1em !important;
+  min-width: 2.5em;
+  opacity: 0.5;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.cbs-line-content {
+  padding-left: 0.5em !important;
+  white-space: pre;
+  width: 100%;
+}
+
+/* ========================================
+   Line Highlight
+   ======================================== */
+
+.cbs-theme-dark .cbs-line-highlight {
+  background: rgba(99, 163, 255, 0.12);
+}
+
+.cbs-theme-light .cbs-line-highlight {
+  background: rgba(99, 163, 255, 0.15);
+}
+
+/* ========================================
+   Diff Highlight
+   ======================================== */
+
+.cbs-theme-dark .cbs-diff-inserted {
+  background: rgba(80, 200, 120, 0.15);
+}
+
+.cbs-theme-dark .cbs-diff-deleted {
+  background: rgba(255, 85, 85, 0.15);
+}
+
+.cbs-theme-light .cbs-diff-inserted {
+  background: rgba(40, 167, 69, 0.12);
+}
+
+.cbs-theme-light .cbs-diff-deleted {
+  background: rgba(220, 53, 69, 0.12);
+}
+
+/* ========================================
+   Command Line Prompt
+   ======================================== */
+
+.cbs-prompt {
+  user-select: none;
+  padding-right: 0.75em !important;
+  opacity: 0.6;
+  white-space: nowrap;
+  vertical-align: top;
+  font-family: inherit;
+}
+
+/* ========================================
+   One Dark Theme (for dark mode)
+   ======================================== */
+
+.cbs-theme-dark pre {
+  background: hsl(220, 13%, 18%) !important;
+  color: hsl(220, 14%, 71%) !important;
+}
+
+.cbs-theme-dark .token.comment,
+.cbs-theme-dark .token.prolog,
+.cbs-theme-dark .token.cdata {
+  color: hsl(220, 10%, 40%);
+}
+
+.cbs-theme-dark .token.doctype,
+.cbs-theme-dark .token.punctuation,
+.cbs-theme-dark .token.entity {
+  color: hsl(220, 14%, 71%);
+}
+
+.cbs-theme-dark .token.attr-name,
+.cbs-theme-dark .token.class-name,
+.cbs-theme-dark .token.boolean,
+.cbs-theme-dark .token.constant,
+.cbs-theme-dark .token.number,
+.cbs-theme-dark .token.atrule {
+  color: hsl(29, 54%, 61%);
+}
+
+.cbs-theme-dark .token.keyword {
+  color: hsl(286, 60%, 67%);
+}
+
+.cbs-theme-dark .token.property,
+.cbs-theme-dark .token.tag,
+.cbs-theme-dark .token.symbol,
+.cbs-theme-dark .token.deleted,
+.cbs-theme-dark .token.important {
+  color: hsl(355, 65%, 65%);
+}
+
+.cbs-theme-dark .token.selector,
+.cbs-theme-dark .token.string,
+.cbs-theme-dark .token.char,
+.cbs-theme-dark .token.builtin,
+.cbs-theme-dark .token.inserted,
+.cbs-theme-dark .token.regex,
+.cbs-theme-dark .token.attr-value,
+.cbs-theme-dark .token.attr-value > .token.punctuation {
+  color: hsl(95, 38%, 62%);
+}
+
+.cbs-theme-dark .token.variable,
+.cbs-theme-dark .token.operator,
+.cbs-theme-dark .token.function {
+  color: hsl(207, 82%, 66%);
+}
+
+.cbs-theme-dark .token.url {
+  color: hsl(187, 47%, 55%);
+}
+
+.cbs-theme-dark .token.attr-value > .token.punctuation.attr-equals,
+.cbs-theme-dark .token.special-attr > .token.attr-value > .token.value.css {
+  color: hsl(220, 14%, 71%);
+}
+
+/* ========================================
+   One Light Theme (for light mode)
+   ======================================== */
+
+.cbs-theme-light pre {
+  background: hsl(230, 1%, 98%) !important;
+  color: hsl(230, 8%, 24%) !important;
+}
+
+.cbs-theme-light .token.comment,
+.cbs-theme-light .token.prolog,
+.cbs-theme-light .token.cdata {
+  color: hsl(230, 4%, 64%);
+}
+
+.cbs-theme-light .token.doctype,
+.cbs-theme-light .token.punctuation,
+.cbs-theme-light .token.entity {
+  color: hsl(230, 8%, 24%);
+}
+
+.cbs-theme-light .token.attr-name,
+.cbs-theme-light .token.class-name,
+.cbs-theme-light .token.boolean,
+.cbs-theme-light .token.constant,
+.cbs-theme-light .token.number,
+.cbs-theme-light .token.atrule {
+  color: hsl(35, 99%, 36%);
+}
+
+.cbs-theme-light .token.keyword {
+  color: hsl(301, 63%, 40%);
+}
+
+.cbs-theme-light .token.property,
+.cbs-theme-light .token.tag,
+.cbs-theme-light .token.symbol,
+.cbs-theme-light .token.deleted,
+.cbs-theme-light .token.important {
+  color: hsl(5, 74%, 59%);
+}
+
+.cbs-theme-light .token.selector,
+.cbs-theme-light .token.string,
+.cbs-theme-light .token.char,
+.cbs-theme-light .token.builtin,
+.cbs-theme-light .token.inserted,
+.cbs-theme-light .token.regex,
+.cbs-theme-light .token.attr-value,
+.cbs-theme-light .token.attr-value > .token.punctuation {
+  color: hsl(119, 34%, 47%);
+}
+
+.cbs-theme-light .token.variable,
+.cbs-theme-light .token.operator,
+.cbs-theme-light .token.function {
+  color: hsl(221, 87%, 60%);
+}
+
+.cbs-theme-light .token.url {
+  color: hsl(198, 99%, 37%);
+}
+
+.cbs-theme-light .token.attr-value > .token.punctuation.attr-equals,
+.cbs-theme-light .token.special-attr > .token.attr-value > .token.value.css {
+  color: hsl(230, 8%, 24%);
+}
